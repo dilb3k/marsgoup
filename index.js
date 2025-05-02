@@ -33,9 +33,16 @@ const userSchema = new mongoose.Schema({
     favoriteItems: [String],
     orders: [Object],
     historyOfOrders: [Object],
-    creditCard: String,
+    creditCard: [Object],
     locations: [Object],
     notifications: [Object]
+});
+
+const chatSchema = new mongoose.Schema({
+    id: String,
+    send_at: String,
+    user_id: String,
+    text: String,
 });
 
 const productSchema = new mongoose.Schema({
@@ -63,10 +70,9 @@ const productSchema = new mongoose.Schema({
 // Models
 const User = mongoose.model('User', userSchema);
 const Product = mongoose.model('Product', productSchema);
+const Chat = mongoose.model('Chat', chatSchema);
 
 // === USER ROUTES ===
-
-// [GET] Barcha userlar
 app.get('/api/users', async (req, res) => {
     try {
         const users = await User.find();
@@ -76,7 +82,6 @@ app.get('/api/users', async (req, res) => {
     }
 });
 
-// [GET] Bitta user
 app.get('/api/users/:id', async (req, res) => {
     try {
         const user = await User.findOne({ id: req.params.id });
@@ -87,7 +92,6 @@ app.get('/api/users/:id', async (req, res) => {
     }
 });
 
-// [POST] Yangi user
 app.post('/api/users', async (req, res) => {
     try {
         const newUser = new User(req.body);
@@ -98,7 +102,6 @@ app.post('/api/users', async (req, res) => {
     }
 });
 
-// [PUT] To‘liq yangilash
 app.put('/api/users/:id', async (req, res) => {
     try {
         const updatedUser = await User.findOneAndReplace({ id: req.params.id }, req.body, { new: true });
@@ -108,7 +111,6 @@ app.put('/api/users/:id', async (req, res) => {
     }
 });
 
-// [PATCH] Qisman yangilash
 app.patch('/api/users/:id', async (req, res) => {
     try {
         const updatedUser = await User.findOneAndUpdate({ id: req.params.id }, req.body, { new: true });
@@ -118,7 +120,6 @@ app.patch('/api/users/:id', async (req, res) => {
     }
 });
 
-// [DELETE] O‘chirish
 app.delete('/api/users/:id', async (req, res) => {
     try {
         await User.findOneAndDelete({ id: req.params.id });
@@ -129,8 +130,6 @@ app.delete('/api/users/:id', async (req, res) => {
 });
 
 // === PRODUCT ROUTES ===
-
-// [GET] Barcha productlar
 app.get('/api/products', async (req, res) => {
     try {
         const products = await Product.find();
@@ -140,7 +139,6 @@ app.get('/api/products', async (req, res) => {
     }
 });
 
-// [GET] Bitta product
 app.get('/api/products/:id', async (req, res) => {
     try {
         const product = await Product.findOne({ id: req.params.id });
@@ -151,7 +149,6 @@ app.get('/api/products/:id', async (req, res) => {
     }
 });
 
-// [POST] Yangi product
 app.post('/api/products', async (req, res) => {
     try {
         const newProduct = new Product(req.body);
@@ -162,7 +159,6 @@ app.post('/api/products', async (req, res) => {
     }
 });
 
-// [PUT] To‘liq yangilash
 app.put('/api/products/:id', async (req, res) => {
     try {
         const updatedProduct = await Product.findOneAndReplace({ id: req.params.id }, req.body, { new: true });
@@ -172,7 +168,6 @@ app.put('/api/products/:id', async (req, res) => {
     }
 });
 
-// [PATCH] Qisman yangilash
 app.patch('/api/products/:id', async (req, res) => {
     try {
         const updatedProduct = await Product.findOneAndUpdate({ id: req.params.id }, req.body, { new: true });
@@ -182,11 +177,58 @@ app.patch('/api/products/:id', async (req, res) => {
     }
 });
 
-// [DELETE] O‘chirish
 app.delete('/api/products/:id', async (req, res) => {
     try {
         await Product.findOneAndDelete({ id: req.params.id });
         res.json({ message: 'Product o‘chirildi' });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// === CHAT ROUTES ===
+app.get('/api/chats', async (req, res) => {
+    try {
+        const chats = await Chat.find();
+        res.json(chats);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+app.get('/api/chats/:id', async (req, res) => {
+    try {
+        const chat = await Chat.findOne({ id: req.params.id });
+        if (!chat) return res.status(404).json({ message: 'Chat topilmadi' });
+        res.json(chat);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+app.post('/api/chats', async (req, res) => {
+    try {
+        const newChat = new Chat(req.body);
+        await newChat.save();
+        res.status(201).json(newChat);
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
+});
+
+app.patch('/api/chats/:id', async (req, res) => {
+    try {
+        const updatedChat = await Chat.findOneAndUpdate({ id: req.params.id }, req.body, { new: true });
+        res.json(updatedChat);
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
+});
+
+app.delete('/api/chats/:id', async (req, res) => {
+    try {
+        await Chat.findOneAndDelete({ id: req.params.id });
+        res.json({ message: 'Chat o‘chirildi' });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
