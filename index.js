@@ -42,6 +42,8 @@ const chatSchema = new mongoose.Schema({
     id: String,
     send_at: String,
     user_id: String,
+    admin_id: String,
+    status: String,
     text: String,
 });
 
